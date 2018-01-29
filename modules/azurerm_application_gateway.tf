@@ -4,47 +4,40 @@ variable "subscription_id" {}
 variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
-
-# Create a resource group
-resource "azurerm_resource_group" "rg" {
-  name     = "my-rg-application-gateway-12345"
-  location = "West US"
+variable "frontend_subnet" {
+  description = "The frontend subnet where resources will be created"
+  default     = "myFrontendSubnet"
+}
+variable "backend_subnet" {
+  description = "The backend subnet where resources will be created"
+  default     = "myBackendendSubnet"
+}
+variable "location" {
+  description = "The location where resources will be created"
+  default     = "Japan West"
+}
+variable "resource_group_name" {
+  description = "The name of the resource group in which the resources will be created"
+  default     = "myResourceGroup"
 }
 
-# Create a application gateway in the web_servers resource group
-resource "azurerm_virtual_network" "vnet" {
-  name                = "my-vnet-12345"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  address_space       = ["10.254.0.0/16"]
-  location            = "${azurerm_resource_group.rg.location}"
-}
+#  Imported using the resource
+# terraform import azurerm_resource_group.mygroup /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/"${resource_group_name}"
+terraform import azurerm_resource_group.mygroup /subscriptions/"${subscription_id}"/resourceGroups/"${resource_group_name}"
 
-resource "azurerm_subnet" "sub1" {
-  name                 = "my-subnet-1"
-  resource_group_name  = "${azurerm_resource_group.rg.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  address_prefix       = "10.254.0.0/24"
-}
-
-resource "azurerm_subnet" "sub2" {
-  name                 = "my-subnet-2"
-  resource_group_name  = "${azurerm_resource_group.rg.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  address_prefix       = "10.254.2.0/24"
-}
-
+# Create an application gateway public ip
 resource "azurerm_public_ip" "pip" {
-  name                         = "my-pip-12345"
-  location                     = "${azurerm_resource_group.rg.location}"
-  resource_group_name          = "${azurerm_resource_group.rg.name}"
+  name                         = "my-pip-keisen-prd"
+  location                     = "${location}"
+  resource_group_name          = "${resource_group_name}"
   public_ip_address_allocation = "dynamic"
 }
 
 # Create an application gateway
 resource "azurerm_application_gateway" "network" {
-  name                = "my-application-gateway-12345"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  location            = "West US"
+  name                = "my-application-gateway-keisen-prd"
+  resource_group_name = "${resource_group_name}"
+  location            = "${location}"
 
   sku {
     name           = "Standard_Small"
@@ -54,7 +47,7 @@ resource "azurerm_application_gateway" "network" {
 
   gateway_ip_configuration {
       name         = "my-gateway-ip-configuration"
-      subnet_id    = "${azurerm_virtual_network.vnet.id}/subnets/${azurerm_subnet.sub1.name}"
+      subnet_id    = "${azurerm_virtual_network.vnet.id}/subnets/${frontend_subnet}"
   }
 
   frontend_port {
