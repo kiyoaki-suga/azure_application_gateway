@@ -1,3 +1,10 @@
+variable "default_user" {}
+variable "default_password" {}
+variable "subscription_id" {}
+variable "client_id" {}
+variable "client_secret" {}
+variable "tenant_id" {}
+
 # Create a resource group
 resource "azurerm_resource_group" "rg" {
   name     = "my-rg-application-gateway-12345"
