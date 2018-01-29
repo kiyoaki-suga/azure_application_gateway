@@ -1,0 +1,6 @@
+default_user = "xxxxxxxx"
+default_password = "xxxxxxxxxxxxxx"
+subscription_id = "Your_subscription_id"
+client_id       = "Your_client_id"
+client_secret   = "Your_client_secret"
+tenant_id       = "your_tenant_id"
